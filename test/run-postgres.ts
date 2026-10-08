@@ -7,6 +7,7 @@ const files = [
   'test/scenarios.test.ts',
   'test/concurrency.test.ts',
   'test/query-budget.test.ts',
+  'test/db-invariants.test.ts',
   'test/failures.test.ts',
   'test/retry.test.ts',
 ];

@@ -108,23 +108,31 @@ function txOps(db: Db, c: pg.PoolClient): TicketTx {
       return rows[0] ? toTicket(rows[0]) : null;
     },
     async insert(t) {
-      const { rowCount } = await db.query(
-        `INSERT INTO tickets (${TICKET_COLS}) VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9)
+      try {
+        const { rowCount } = await db.query(
+          `INSERT INTO tickets (${TICKET_COLS}) VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9)
          ON CONFLICT (idempotency_key) DO NOTHING`,
-        [
-          t.id,
-          t.eventId,
-          t.volunteerId,
-          t.visitorName,
-          t.itemDescription,
-          t.category,
-          t.status,
-          t.idempotencyKey,
-          t.createdAt,
-        ],
-        c,
-      );
-      return rowCount === 1 ? 'inserted' : 'duplicate';
+          [
+            t.id,
+            t.eventId,
+            t.volunteerId,
+            t.visitorName,
+            t.itemDescription,
+            t.category,
+            t.status,
+            t.idempotencyKey,
+            t.createdAt,
+          ],
+          c,
+        );
+        return rowCount === 1 ? 'inserted' : 'duplicate';
+      } catch (error) {
+        const dbError = error as { code?: string; constraint?: string };
+        if (dbError.code === '23514' && dbError.constraint === 'events_active_capacity') {
+          throw new DomainError('CONFLICT', 'Queue for this event is full', 'QUEUE_FULL');
+        }
+        throw error;
+      }
     },
     async save(t) {
       try {
