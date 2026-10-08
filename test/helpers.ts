@@ -1,6 +1,7 @@
 import type { FastifyInstance } from 'fastify';
 import { buildApp } from '../src/app.js';
 import { loadConfig } from '../src/config/index.js';
+import { assertIsolatedTestDatabase, resetTestDatabase } from './pg-fixture.js';
 
 export const EVENT_OPEN = '11111111-1111-4111-8111-111111111111';
 export const EVENT_CLOSED = '22222222-2222-4222-8222-222222222222';
@@ -8,10 +9,17 @@ export const OLENA = 'aaaaaaaa-0000-4000-8000-000000000001'; // electronics, app
 export const TARAS = 'aaaaaaaa-0000-4000-8000-000000000002'; // bicycles
 export const MYKOLA = 'aaaaaaaa-0000-4000-8000-000000000004'; // electronics, furniture
 
-export const config = { ...loadConfig({}), logLevel: 'silent', storage: 'memory' };
+const storage = process.env.TEST_STORAGE === 'postgres' ? 'postgres' : 'memory';
+const databaseUrl =
+  storage === 'postgres' ? assertIsolatedTestDatabase(process.env.TEST_DATABASE_URL) : undefined;
+export const config = {
+  ...loadConfig({ STORAGE: storage, DATABASE_URL: databaseUrl, GIT_SHA: 'test-sha' }),
+  logLevel: 'silent',
+};
 
-/** Fresh app with an empty in-memory queue. */
+/** Fresh app with a clean queue in the selected storage adapter. */
 export async function freshApp(): Promise<FastifyInstance> {
+  if (storage === 'postgres') await resetTestDatabase(config.databaseUrl);
   const app = buildApp(config);
   await app.ready();
   return app;
