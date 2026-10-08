@@ -13,13 +13,13 @@
 | `modules/tickets`    | черга речей, взяття в роботу, машина статусів      | `shared`, API `events`, `volunteers` |
 | `platform`           | HTTP (Fastify), мапінг помилок, версія             | `shared`, API модулів                |
 | `config`             | єдине місце читання `process.env`                  | —                                    |
-| `shared`             | `DomainError`, `Id`                                | —                                    |
+| `shared`             | `DomainError`, `Id`, **`Category`** (спільне ядро) | —                                    |
 | `app.ts`             | composition root                                   | усе                                  |
 
 Всередині модуля: `domain.ts` (типи + чисті правила) → `service.ts` (сценарії) → `ports.ts`
 (інтерфейси сховищ; реалізації — Лаба 2). **Правила меж:** (R1) інший модуль — лише через `index.ts`;
 (R2) `domain.ts` залежить лише від `shared`; (R3) модулі не імпортують `platform`; (R4) `shared` — лист;
-(R5) без циклів. Усе перевіряє `make deps`.
+(R5) без циклів. Поняття, потрібне доменам двох модулів, живе в `shared`. Усе перевіряє `make deps`.
 
 ## 2. Дані
 

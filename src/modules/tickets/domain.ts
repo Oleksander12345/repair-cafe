@@ -1,6 +1,6 @@
 import type { FastifyError } from 'fastify';
+import type { Category } from '../../shared/categories.js';
 import type { Id } from '../../shared/ids.js';
-import type { Category } from '../volunteers/domain.js';
 
 /**
  * Життєвий цикл речі на ремонті:

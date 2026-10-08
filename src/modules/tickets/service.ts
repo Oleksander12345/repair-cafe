@@ -1,8 +1,8 @@
 import { DomainError } from '../../shared/errors.js';
+import type { Category } from '../../shared/categories.js';
 import { newId } from '../../shared/ids.js';
 import type { Id } from '../../shared/ids.js';
 import type { EventService } from '../events/index.js';
-import type { Category } from '../volunteers/domain.js';
 import type { VolunteerService } from '../volunteers/index.js';
 import { assertTransition, canRepair } from './domain.js';
 import type { Ticket } from './domain.js';
