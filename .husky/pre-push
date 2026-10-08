@@ -1,0 +1,3 @@
+npm run deps:check
+npm run test:smoke
+npm run build
