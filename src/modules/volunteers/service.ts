@@ -5,6 +5,7 @@ import type { VolunteerRepository } from './ports.js';
 
 export interface VolunteerService {
   getVolunteer(id: Id): Promise<Volunteer>;
+  listVolunteers(): Promise<Volunteer[]>;
 }
 
 export function createVolunteerService(repo: VolunteerRepository): VolunteerService {
@@ -14,5 +15,6 @@ export function createVolunteerService(repo: VolunteerRepository): VolunteerServ
       if (!v) throw new DomainError('NOT_FOUND', `Volunteer ${id} not found`);
       return v;
     },
+    listVolunteers: () => repo.list(),
   };
 }

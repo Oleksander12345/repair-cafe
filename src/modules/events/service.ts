@@ -5,7 +5,7 @@ import type { EventRepository } from './ports.js';
 
 export interface EventService {
   getEvent(id: Id): Promise<RepairEvent>;
-  /** Кидає CONFLICT, якщо сесія не приймає речі. */
+  /** Throw CONFLICT when the event does not accept tickets. */
   getOpenEvent(id: Id): Promise<RepairEvent>;
   listEvents(): Promise<RepairEvent[]>;
 }
