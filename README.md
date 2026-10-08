@@ -11,6 +11,9 @@
 - майстер бере лише речі зі своїх категорій (електроніка, текстиль, велосипеди…);
 - статуси змінюються лише за дозволеними переходами; повторна реєстрація (подвійний клік) не створює дубль.
 
+Це вимоги до системи. Лабораторна 1 реалізує каркас і частину доменних правил; постійне сховище
+та транзакційне забезпечення інваріантів залишаються наступним етапом.
+
 ## Стек
 
 Node.js 22 · TypeScript (strict) · Fastify · ESLint + Prettier · dependency-cruiser · husky + lint-staged · `node:test`.
@@ -18,12 +21,23 @@ Node.js 22 · TypeScript (strict) · Fastify · ESLint + Prettier · dependency-
 
 ## Швидкий старт
 
+Потрібен Node.js 22.22.1 або новіший сумісний реліз. Для запуску shell-скриптів у Windows
+використовуйте Git Bash.
+
 ```bash
 make install     # залежності + git hooks
 make check       # усі перевірки (те саме, що й hooks)
 make run         # сервер на :3000, версія = поточний git sha
 make version     # {"name":"repair-cafe","version":"<sha>"}
 make hook-demo   # доказ, що hook блокує брудний коміт
+```
+
+Якщо у Windows немає GNU Make, еквівалентні команди в Git Bash:
+
+```bash
+npm ci
+npm run check
+bash ./scripts/hook-demo.sh # після першого коміту, за чистого робочого дерева
 ```
 
 ## Де що лежить

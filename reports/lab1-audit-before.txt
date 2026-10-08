@@ -1,0 +1,20 @@
+Lab 1 architecture audit on the reconstructed draft
+Date: 2026-10-09
+
+Command: npm run deps:check
+Exit code: 4
+
+  error module-public-api-only: src/modules/tickets/service.ts -> src/modules/volunteers/ports.ts
+  error module-public-api-only: src/modules/tickets/service.ts -> src/modules/volunteers/domain.ts
+  error module-public-api-only: src/modules/tickets/domain.ts -> src/modules/volunteers/domain.ts
+  error domain-is-pure: src/modules/tickets/domain.ts -> node_modules/fastify/fastify.js
+
+4 dependency violations (4 errors, 0 warnings). 23 modules, 54 dependencies cruised.
+
+Command: npm run lint
+Exit code: 1
+
+src/platform/version.ts:4:7   process.env is restricted outside src/config
+src/platform/version.ts:4:35  process.env is restricted outside src/config
+
+2 problems (2 errors, 0 warnings).
