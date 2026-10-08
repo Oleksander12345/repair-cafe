@@ -3,7 +3,7 @@ import { newId } from '../../shared/ids.js';
 import type { Id } from '../../shared/ids.js';
 import type { EventService } from '../events/index.js';
 import type { Category } from '../volunteers/domain.js';
-import type { VolunteerRepository } from '../volunteers/ports.js';
+import type { VolunteerService } from '../volunteers/index.js';
 import { assertTransition, canRepair } from './domain.js';
 import type { Ticket } from './domain.js';
 import type { TicketRepository } from './ports.js';
@@ -19,7 +19,7 @@ export interface RegisterTicketCommand {
 export function createTicketService(
   tickets: TicketRepository,
   events: EventService,
-  volunteers: VolunteerRepository,
+  volunteers: VolunteerService,
 ) {
   return {
     /** Записати річ у чергу сесії. Повтор з тим самим ключем повертає той самий тікет. */
@@ -45,8 +45,7 @@ export function createTicketService(
     async claim(ticketId: Id, volunteerId: Id): Promise<void> {
       const ticket = await tickets.findById(ticketId);
       if (!ticket) throw new DomainError('NOT_FOUND', `Ticket ${ticketId} not found`);
-      const volunteer = await volunteers.findById(volunteerId);
-      if (!volunteer) throw new DomainError('NOT_FOUND', `Volunteer ${volunteerId} not found`);
+      const volunteer = await volunteers.getVolunteer(volunteerId);
       if (!canRepair(volunteer.skills, ticket.category)) {
         throw new DomainError('VALIDATION', `Volunteer cannot repair ${ticket.category}`);
       }
