@@ -8,6 +8,7 @@ test('PostgreSQL tests reject a default or non-test database', () => {
     'postgres://localhost:5432/repair_cafe_lab2_test_a',
     'postgres://localhost:55432/repair_cafe',
     'postgres://db.example:55432/repair_cafe_lab2_test_a',
+    'postgres://localhost:55432/repair_cafe_lab2_test_a?host=db.example',
   ]) {
     assert.throws(() => assertIsolatedTestDatabase(url));
   }

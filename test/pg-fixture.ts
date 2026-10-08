@@ -18,6 +18,8 @@ export function assertIsolatedTestDatabase(url: string | undefined): string {
   if (
     !['postgres:', 'postgresql:'].includes(parsed.protocol) ||
     !['127.0.0.1', 'localhost'].includes(parsed.hostname) ||
+    parsed.search !== '' ||
+    parsed.hash !== '' ||
     !parsed.port ||
     parsed.port === '5432' ||
     !/^repair_cafe_lab2_test_[a-z0-9_]+$/.test(dbName)
