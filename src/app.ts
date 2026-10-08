@@ -8,7 +8,7 @@ export function buildApp(config: AppConfig): FastifyInstance {
   const app = Fastify({
     logger: config.logLevel === 'silent' ? false : { level: config.logLevel },
   });
-  const version = resolveVersion();
+  const version = resolveVersion(config.gitSha);
   registerErrorHandler(app);
   app.get('/health', async () => ({ status: 'ok' }));
   app.get('/version', async () => ({ name: 'repair-cafe', version }));
