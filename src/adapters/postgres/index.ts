@@ -67,7 +67,20 @@ function txOps(db: Db, c: pg.PoolClient): TicketTx {
       return rows[0] ? toTicket(rows[0]) : null;
     },
     async lockEventForRegistration(eventId) {
-      await db.query('SELECT 1 FROM events WHERE id = $1 FOR UPDATE', [eventId], c);
+      const { rows } = await db.query(
+        'SELECT * FROM events WHERE id = $1 FOR UPDATE',
+        [eventId],
+        c,
+      );
+      return rows[0] ? toEvent(rows[0]) : null;
+    },
+    async lockVolunteerForClaim(volunteerId) {
+      const { rows } = await db.query(
+        'SELECT * FROM volunteers WHERE id = $1 FOR UPDATE',
+        [volunteerId],
+        c,
+      );
+      return rows[0] ? toVolunteer(rows[0]) : null;
     },
     async findByIdempotencyKey(key) {
       const { rows } = await db.query(

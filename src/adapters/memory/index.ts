@@ -38,7 +38,8 @@ export function createMemoryStorage(): MemoryStorage {
       [...tickets.values()].find(
         (t) => t.volunteerId === volunteerId && t.status === 'in_repair',
       ) ?? null,
-    lockEventForRegistration: async () => undefined, // Transactions are already serialized.
+    lockEventForRegistration: async (eventId) => events.get(eventId) ?? null,
+    lockVolunteerForClaim: async (volunteerId) => volunteers.get(volunteerId) ?? null,
     async insert(t) {
       if ([...tickets.values()].some((x) => x.idempotencyKey === t.idempotencyKey))
         return 'duplicate';

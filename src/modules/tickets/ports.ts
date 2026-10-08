@@ -1,4 +1,6 @@
 import type { Id } from '../../shared/ids.js';
+import type { RepairEvent } from '../events/index.js';
+import type { Volunteer } from '../volunteers/index.js';
 import type { Ticket, TicketStatus, TicketTransition } from './domain.js';
 
 /** Operations available within one transaction. */
@@ -6,8 +8,10 @@ export interface TicketTx {
   /** Read and lock a ticket until transaction end. */
   findById(id: Id): Promise<Ticket | null>;
   findByIdempotencyKey(key: string): Promise<Ticket | null>;
-  /** Serialize registrations to one event. */
-  lockEventForRegistration(eventId: Id): Promise<void>;
+  /** Lock and read the authoritative event state in the same transaction. */
+  lockEventForRegistration(eventId: Id): Promise<RepairEvent | null>;
+  /** Lock and read volunteer skills before claiming a ticket. */
+  lockVolunteerForClaim(volunteerId: Id): Promise<Volunteer | null>;
   countActiveInEvent(eventId: Id): Promise<number>;
   findInRepairByVolunteer(volunteerId: Id): Promise<Ticket | null>;
   /** 'duplicate' means another transaction inserted this idempotency key. */

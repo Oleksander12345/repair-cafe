@@ -24,7 +24,7 @@ export function buildApp(config: AppConfig): FastifyInstance {
   if (pgStorage) app.addHook('onClose', () => pgStorage.db.close());
   const events = createEventService(storage.events);
   const volunteers = createVolunteerService(storage.volunteers);
-  const tickets = createTicketService(storage.tickets, events, volunteers);
+  const tickets = createTicketService(storage.tickets, events);
   registerRoutes(app, { events, volunteers, tickets });
 
   app.get('/health', async () => ({ status: 'ok' }));

@@ -6,7 +6,6 @@ import { test } from 'node:test';
 import { createPostgresStorage } from '../src/adapters/postgres/index.js';
 import { createEventService } from '../src/modules/events/index.js';
 import { createTicketService } from '../src/modules/tickets/index.js';
-import { createVolunteerService } from '../src/modules/volunteers/index.js';
 import { resetTestDatabase } from './pg-fixture.js';
 import { EVENT_OPEN, OLENA, config } from './helpers.js';
 
@@ -19,11 +18,7 @@ test(
       await resetTestDatabase(config.databaseUrl);
       const storage = createPostgresStorage(config.databaseUrl);
       const events = createEventService(storage.events);
-      const tickets = createTicketService(
-        storage.tickets,
-        events,
-        createVolunteerService(storage.volunteers),
-      );
+      const tickets = createTicketService(storage.tickets, events);
       for (let i = 0; i < n; i++) {
         const { ticket } = await tickets.register({
           eventId: EVENT_OPEN,

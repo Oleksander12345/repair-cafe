@@ -2,7 +2,6 @@ import { DomainError } from '../../shared/errors.js';
 import { newId } from '../../shared/ids.js';
 import type { Id } from '../../shared/ids.js';
 import type { EventService } from '../events/index.js';
-import type { VolunteerService } from '../volunteers/index.js';
 import { assertTransition, canRepair, isSameRegistration, validateRegistration } from './domain.js';
 import type { Outcome, RegistrationInput, Ticket, TicketTransition } from './domain.js';
 import type { QueueItem, TicketStore } from './ports.js';
@@ -21,11 +20,7 @@ export interface TicketService {
   queue(eventId: Id): Promise<QueueItem[]>;
 }
 
-export function createTicketService(
-  store: TicketStore,
-  events: EventService,
-  volunteers: VolunteerService,
-): TicketService {
+export function createTicketService(store: TicketStore, events: EventService): TicketService {
   const transition = (
     t: Ticket,
     to: Ticket['status'],
@@ -57,7 +52,6 @@ export function createTicketService(
   return {
     async register(cmd) {
       validateRegistration(cmd);
-      const event = await events.getOpenEvent(cmd.eventId);
       const replay = (existing: Ticket) => {
         if (!isSameRegistration(existing, cmd)) {
           throw new DomainError(
@@ -71,7 +65,11 @@ export function createTicketService(
       return store.transaction(async (tx) => {
         const existing = await tx.findByIdempotencyKey(cmd.idempotencyKey);
         if (existing) return replay(existing);
-        await tx.lockEventForRegistration(event.id);
+        const event = await tx.lockEventForRegistration(cmd.eventId);
+        if (!event) throw new DomainError('NOT_FOUND', `Event ${cmd.eventId} not found`);
+        if (event.status !== 'open') {
+          throw new DomainError('CONFLICT', `Event ${cmd.eventId} is ${event.status}`);
+        }
         if ((await tx.countActiveInEvent(event.id)) >= event.ticketLimit) {
           throw new DomainError('CONFLICT', 'Queue for this event is full', 'QUEUE_FULL');
         }
@@ -104,9 +102,10 @@ export function createTicketService(
     },
 
     async claim(ticketId, volunteerId) {
-      const volunteer = await volunteers.getVolunteer(volunteerId);
       return store.transaction(async (tx) => {
         const ticket = mustFind(await tx.findById(ticketId), ticketId);
+        const volunteer = await tx.lockVolunteerForClaim(volunteerId);
+        if (!volunteer) throw new DomainError('NOT_FOUND', `Volunteer ${volunteerId} not found`);
         if (!canRepair(volunteer.skills, ticket.category)) {
           throw new DomainError('VALIDATION', `Volunteer cannot repair ${ticket.category}`);
         }
