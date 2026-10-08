@@ -36,7 +36,7 @@ export function registerRoutes(app: FastifyInstance, s: Services): void {
         headers: {
           type: 'object',
           required: ['idempotency-key'],
-          properties: { 'idempotency-key': { type: 'string', minLength: 8, maxLength: 100 } },
+          properties: { 'idempotency-key': { type: 'string', pattern: '^[!-~]{8,100}$' } },
         },
         body: {
           type: 'object',

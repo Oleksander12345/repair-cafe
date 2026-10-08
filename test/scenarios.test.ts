@@ -54,6 +54,7 @@ describe(`Сценарії [STORAGE=${config.storage}]`, () => {
     );
     assert.equal((await register(app, { category: 'cars' })).statusCode, 400);
     assert.equal((await register(app, { itemDescription: '  ' })).statusCode, 400);
+    assert.equal((await register(app, {}, '        ')).statusCode, 400);
     const noKey = await app.inject({
       method: 'POST',
       url: `/events/${EVENT_CLOSED}/tickets`,

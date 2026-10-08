@@ -48,3 +48,29 @@ test(
     }
   },
 );
+
+test(
+  'I4: direct SQL rejects malformed idempotency keys',
+  { skip: config.storage !== 'postgres' },
+  async () => {
+    const app = await freshApp();
+    const client = new pg.Client({ connectionString: config.databaseUrl });
+    try {
+      await client.connect();
+      await assert.rejects(
+        client.query(
+          `INSERT INTO tickets
+          (id, event_id, visitor_name, item_description, category, status, idempotency_key)
+         VALUES ($1, $2, 'Direct writer', 'Broken kettle', 'appliances', 'queued', $3)`,
+          [randomUUID(), EVENT_OPEN, 'bad key'],
+        ),
+        (error: unknown) =>
+          (error as { code?: string; constraint?: string }).code === '23514' &&
+          (error as { constraint?: string }).constraint === 'tickets_idempotency_key_format',
+      );
+    } finally {
+      await client.end().catch(() => undefined);
+      await app.close();
+    }
+  },
+);

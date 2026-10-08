@@ -2,7 +2,13 @@ import { DomainError } from '../../shared/errors.js';
 import { newId } from '../../shared/ids.js';
 import type { Id } from '../../shared/ids.js';
 import type { EventService } from '../events/index.js';
-import { assertTransition, canRepair, isSameRegistration, validateRegistration } from './domain.js';
+import {
+  assertTransition,
+  canRepair,
+  isSameRegistration,
+  validateIdempotencyKey,
+  validateRegistration,
+} from './domain.js';
 import type { Outcome, RegistrationInput, Ticket, TicketTransition } from './domain.js';
 import type { QueueItem, TicketStore } from './ports.js';
 
@@ -52,6 +58,7 @@ export function createTicketService(store: TicketStore, events: EventService): T
   return {
     async register(cmd) {
       validateRegistration(cmd);
+      validateIdempotencyKey(cmd.idempotencyKey);
       const replay = (existing: Ticket) => {
         if (!isSameRegistration(existing, cmd)) {
           throw new DomainError(

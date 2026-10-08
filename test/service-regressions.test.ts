@@ -24,7 +24,18 @@ test('an existing registration can be replayed after the event closes', async ()
   const replay = await service.register(registration);
   assert.equal(replay.created, false);
   assert.equal(replay.ticket.id, first.ticket.id);
-  await assert.rejects(service.register({ ...registration, idempotencyKey: 'new-key' }), {
+  await assert.rejects(service.register({ ...registration, idempotencyKey: 'another-key' }), {
     code: 'CONFLICT',
   });
+});
+
+test('direct service callers cannot write invalid idempotency keys', async () => {
+  const storage = createMemoryStorage();
+  const service = createTicketService(storage.tickets, createEventService(storage.events));
+  for (const idempotencyKey of ['', '        ', ' spaced-key', 'key\nwith-newline']) {
+    await assert.rejects(service.register({ ...registration, idempotencyKey }), {
+      code: 'VALIDATION',
+    });
+  }
+  assert.equal((await service.register(registration)).created, true);
 });

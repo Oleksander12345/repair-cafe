@@ -89,3 +89,13 @@ export function validateRegistration(input: RegistrationInput): void {
     throw new DomainError('VALIDATION', `Unknown category ${input.category}`);
   }
 }
+
+/** HTTP header keys are opaque printable ASCII without spaces or control characters. */
+export function validateIdempotencyKey(key: string): void {
+  if (!/^[!-~]{8,100}$/.test(key)) {
+    throw new DomainError(
+      'VALIDATION',
+      'Idempotency-Key must be 8..100 printable non-space ASCII characters',
+    );
+  }
+}
