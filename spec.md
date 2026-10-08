@@ -72,8 +72,8 @@ erDiagram
 
 ## 4. Критерії прийняття (Лаба 1)
 
-- [x] AC1 `make check` зелений: формат, лінт, типи, архітектура R1–R5, smoke, збірка.
-- [x] AC2 Брудний коміт блокується hook-ом — `make hook-demo` → `OK`.
+- [x] AC1 Повний `npm run check` зелений: формат, лінт, типи, архітектура R1–R5, smoke, збірка. `make check` є обгорткою.
+- [x] AC2 Брудний коміт блокується hook-ом — `scripts/hook-demo.sh` у Git Bash → `OK`. `make hook-demo` є обгорткою.
 - [x] AC3 `GET /health` → 200; `GET /version` → поточний git sha.
 - [x] AC4 Структура `src/` дорівнює таблиці §1; порушення меж ловить `make deps`.
 - [x] AC5 Помилки домену — `DomainError` з кодом; HTTP-статус визначає лише `platform`. Перевірка: smoke-тест.
