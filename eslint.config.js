@@ -12,7 +12,16 @@ export default tseslint.config(
       '@typescript-eslint/consistent-type-imports': 'error',
       eqeqeq: ['error', 'always'],
       'no-console': 'error',
+      // Стандарт: конфігурація читається лише в src/config (див. standards/checks.md, C-07)
+      'no-restricted-properties': [
+        'error',
+        { object: 'process', property: 'env', message: 'Читайте env лише через src/config.' },
+      ],
     },
+  },
+  {
+    files: ['src/config/**', 'test/**', 'scripts/**'],
+    rules: { 'no-restricted-properties': 'off' },
   },
   prettier,
 );
