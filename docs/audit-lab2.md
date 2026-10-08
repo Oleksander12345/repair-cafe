@@ -21,6 +21,10 @@ closure. `test/service-regressions.test.ts` demonstrates that replay and rejects
 registration to the closed event. The memory test passed; the database interleaving
 still needs a real PG run.
 
+An additional PostgreSQL case in `test/db-invariants.test.ts` is prepared to close the
+event with SQL after the first registration and verify a 200 replay but 409 for a new
+key; it has not yet been run against a live database.
+
 ## 2. Capacity depended on every writer following the application lock protocol
 
 **Before (`442259f`):** registration locked `events` and counted active tickets, but
@@ -54,8 +58,11 @@ same-key/different-body replays.
 - `test/query-budget.test.ts` checks that the board uses at most two client SQL calls
   for 1 and 15 tickets. The adapter uses one joined ticket/volunteer query plus one
   event lookup; this is code evidence until the PostgreSQL test runs.
-- `test/failures.test.ts` covers 503, `Retry-After`, liveness and readiness against a
-  deliberately unreachable port. `test/retry.test.ts` passed the bounded retry cases.
+- `test/failures.test.ts` passed F1–F3 against a deliberately unreachable loopback
+  port: liveness stayed 200, readiness and operations returned 503, and write errors
+  included `Retry-After: 5` without leaking the connection address. This is a failed
+  connection test, not a live PostgreSQL restart. `test/retry.test.ts` passed the
+  bounded retry cases.
 - `test:db` refuses to start without `TEST_DATABASE_URL` for a dedicated loopback
   database on a non-default port. The negative guard test passed; no schema was
   applied to the existing `localhost:5432` server.

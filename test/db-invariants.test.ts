@@ -2,7 +2,7 @@ import assert from 'node:assert/strict';
 import { randomUUID } from 'node:crypto';
 import { test } from 'node:test';
 import pg from 'pg';
-import { EVENT_OPEN, OLENA, claim, complete, config, freshApp, register } from './helpers.js';
+import { EVENT_OPEN, OLENA, claim, complete, config, freshApp, key, register } from './helpers.js';
 
 test(
   'I3: a direct SQL writer cannot exceed event capacity',
@@ -68,6 +68,30 @@ test(
           (error as { code?: string; constraint?: string }).code === '23514' &&
           (error as { constraint?: string }).constraint === 'tickets_idempotency_key_format',
       );
+    } finally {
+      await client.end().catch(() => undefined);
+      await app.close();
+    }
+  },
+);
+
+test(
+  'a committed registration replays after the event closes',
+  { skip: config.storage !== 'postgres' },
+  async () => {
+    const app = await freshApp();
+    const client = new pg.Client({ connectionString: config.databaseUrl });
+    try {
+      const idempotencyKey = key('closed-event');
+      const original = await register(app, {}, idempotencyKey);
+      assert.equal(original.statusCode, 201);
+      await client.connect();
+      await client.query("UPDATE events SET status = 'closed' WHERE id = $1", [EVENT_OPEN]);
+
+      const replay = await register(app, {}, idempotencyKey);
+      assert.equal(replay.statusCode, 200);
+      assert.equal(replay.json().id, original.json().id);
+      assert.equal((await register(app, {}, key('new-after-close'))).statusCode, 409);
     } finally {
       await client.end().catch(() => undefined);
       await app.close();
