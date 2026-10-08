@@ -70,3 +70,31 @@ same-key/different-body replays.
 The live PostgreSQL results, any failed attempts, and exact runtime should be appended
 here after an authorized isolated test run. Do not substitute the supplied archive's
 report numbers for fresh evidence.
+
+## Isolated PostgreSQL verification — 2026-10-09
+
+The preceding pending notes describe the state before the authorized database run.
+On Node.js 22.22.1 and PostgreSQL 18, an `initdb` cluster was started under the
+repository's temporary `.lab2-test-runtime/pg-cluster-20261009` directory, bound to
+`127.0.0.1:55432`. The fixture applied migrations only to
+`repair_cafe_lab2_test_20261009`; `SHOW data_directory` confirmed the intended
+cluster before the run. The existing server on port 5432 was not used.
+
+`npm.cmd run test:db` passed **25/25** tests: S1–S10, C1–C5, three direct-SQL
+invariant/replay tests, F1–F3, Q1, and R1–R3. Thus the direct sixth insert was
+rejected by the database, malformed keys were rejected by SQL, and replay after
+event closure worked. Q1 passed the at-most-two-client-query budget for both 1
+and 15 tickets. The five C-series races then passed in **five additional runs**
+(25/25 repeated race cases). These results supersede the earlier pending
+PostgreSQL statements above; there were no failed attempts in this run.
+
+Limits of evidence: F1–F3 use an unreachable loopback port, not a stopped and
+restarted live server. R1–R3 inject PostgreSQL error codes into the retry wrapper;
+they do not create a real database deadlock. Q1 counts application-issued queries,
+not server-side statements from triggers. The run does not prove behavior under
+production load or a real identity/authorization scheme.
+
+After verification, the isolated server was stopped; its exact temporary
+cluster, log, and empty parent directory were removed. This disposable test
+data has no backup and is not recoverable. No existing PostgreSQL cluster or
+database was removed.
