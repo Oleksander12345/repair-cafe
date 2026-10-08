@@ -2,7 +2,8 @@ import assert from 'node:assert/strict';
 import { test } from 'node:test';
 import { buildApp } from '../src/app.js';
 import { loadConfig } from '../src/config/index.js';
-import { canRepair, canTransition } from '../src/modules/tickets/index.js';
+import { assertTransition, canRepair, canTransition } from '../src/modules/tickets/index.js';
+import { DomainError } from '../src/shared/errors.js';
 
 const config = { ...loadConfig({}), logLevel: 'silent', gitSha: 'test-sha' };
 
@@ -32,4 +33,11 @@ test('статуси: дозволені й заборонені переход�
 test('canRepair: майстер з велосипедами не бере електроніку', () => {
   assert.equal(canRepair(['bicycles'], 'electronics'), false);
   assert.equal(canRepair(['bicycles', 'electronics'], 'electronics'), true);
+});
+
+test('invalid transition returns a domain conflict, not an HTTP error', () => {
+  assert.throws(
+    () => assertTransition('fixed', 'in_repair'),
+    (error: unknown) => error instanceof DomainError && error.code === 'CONFLICT',
+  );
 });
