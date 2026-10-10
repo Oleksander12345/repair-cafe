@@ -3,4 +3,5 @@ import type { Volunteer } from './domain.js';
 
 export interface VolunteerRepository {
   findById(id: Id): Promise<Volunteer | null>;
+  list(): Promise<Volunteer[]>;
 }
